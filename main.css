@@ -1,0 +1,72 @@
+body {
+  background : #333;
+  color: #FFF;
+}
+
+canvas {
+  position : absolute;
+  top      : 0px;
+  left     : 0px;
+}
+
+h1 {
+  font-family : Arial;
+  font-size   : 20px;
+  font-weight : bold;
+}
+
+.view {
+  height: 700px;
+}
+
+#sliders, #speeds {
+  width    : 100%;
+}
+
+#sliders > div{
+  width    : 90%;
+  clear: both;
+  float: left;
+}
+
+.sl {
+  width: 90%;
+  margin-left: 15%;
+}
+
+.set {
+  
+  float: left;
+  clear: both;
+}
+
+.set span {
+  float: left;
+  padding: 0 10px;
+  margin: 8px 0;
+}
+
+.set#speeds span {
+  float: left;
+  padding: 0 10px;
+  margin: 8px 0;
+}
+
+#sliders.set .sl {
+margin: 10px 100px;
+}
+
+.set#speeds .sl {
+float: right;
+margin: 10px;
+width: 90%;
+}
+
+.set input {
+  margin: 0;
+}
+
+.to {
+  width: 90%;
+  height: 40px;
+}
