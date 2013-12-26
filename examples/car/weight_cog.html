@@ -20,13 +20,13 @@
          <div class="templates hidden">
             <div class="controls">
                 <h2><span class="dark">Radii</span> %(name)s</h2>
-                <input data-index="%(index)s" data-r="%(rindex)s" id="radius_%(id)s" type="range" min="1" max="99">
-                <input data-index="%(index)s" data-r="%(rindex)s" id="speed_%(id)s" type="range" min="-100" max="100">
+                <input data-index="%(index)s" value='%(tradius)s' data-r="%(rindex)s" id="radius_%(id)s" type="range" min="1" max="99">
+                <input data-index="%(index)s" value='%(tspeed)s' data-r="%(rindex)s" id="speed_%(id)s" type="range" min="-100" max="100">
             </div>
         </div>
         <div class='view'>
-            <canvas id="fractal" width='800px' height='700px'></canvas>
-            <canvas id="circles" width='800px' height='700px'></canvas>
+            <canvas id="fractal" width='960px' height='700px'></canvas>
+            <canvas id="circles" width='960px' height='700px'></canvas>
         </div>
 
         <div class='set' id="sliders">

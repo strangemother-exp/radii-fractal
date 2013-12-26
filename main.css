@@ -92,5 +92,6 @@ margin: 0 5px;
 color: #999;
 }
 
-
-
+.control input[type='range'] {
+width: 200px;
+}

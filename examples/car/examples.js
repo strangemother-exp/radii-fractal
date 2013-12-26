@@ -155,7 +155,7 @@ var Radii = function(){
     var self = this;
     return { 
         master: function(){
-            this.masterCog = cog(.92 , 0, false, 'master');
+            this.masterCog = cog(.92 , 0, true, 'master');
         },
 
         cog: function(name){
@@ -163,12 +163,17 @@ var Radii = function(){
             var _speed = arg(arguments, 2, .01)
             var _control = arg(arguments, 3, true);
 
+            if(!this.masterCog) {
+                this.master();
+            };
           if(!name) {
                 name = Math.random().toString(32).slice(2)
             }
-            a=[];[].push.apply(a, arguments);
+
+            var a=[];[].push.apply(a, arguments);
             var name = a.shift();
             a.push(name);
+            
             var _cog = cog.apply(this, [_radius, _speed, _control, name]);
 
             if(name) return _cog;
@@ -184,12 +189,10 @@ dc = function(){
 }
 
 weightCog = function(){
-
-    
     var radii = new Radii();
-    radii.master();
-    radii.cog('first');
-    radii.cog('second');
+    
+    radii.cog('first', .1, 0);
+    radii.cog('second', .5, 0);
     
     //fromJson('[[0.89,-0.018333333333333333,true,"8ff125"],[0.87,-0.006666666666666666,true,"8e7691"],[0.83,0.021666666666666664,true,"f2553c"],[0.87,0.03,true,"8ff125"],[0.74,-0.01,true,"8e7691"],[0.6,0.010471975511965976,true,"f2553c"]]');
 }
