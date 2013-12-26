@@ -112,7 +112,6 @@ hsv2hex = function(h,s,v){
 
 }
 
-
 radialDemo = function(){
     $(function() {
         var c = 150;
@@ -136,14 +135,61 @@ radialDemo = function(){
 }
 
 var __cogi = 0
-cog = function(radius, speed, control){
-    addRadii(
-        (localStorage['radii' + __cogi] || radius), 
-        (localStorage['speed' + __cogi] || speed ),
-        control
+cog = function(radius, speed, control, name){
+    var _radius = arg(arguments, 0, radius)
+    var _speed = arg(arguments, 1, speed)
+    var _control = arg(arguments, 2, control);
+
+    var _cog = addRadii(
+        _radius, 
+        _speed ,
+        _control,
+        undefined,
+        name
     );
-    __cogi++
+    __cogi++;
+    return _cog;
 }
+
+var Radii = function(){
+    var self = this;
+    return { 
+        master: function(){
+            this.masterCog = cog(.92 , 0, false, 'master');
+        },
+
+        cog: function(name){
+            var _radius = arg(arguments, 1, .92)
+            var _speed = arg(arguments, 2, .01)
+            var _control = arg(arguments, 3, true);
+
+          if(!name) {
+                name = Math.random().toString(32).slice(2)
+            }
+            a=[];[].push.apply(a, arguments);
+            var name = a.shift();
+            a.push(name);
+            var _cog = cog.apply(this, [_radius, _speed, _control, name]);
+
+            if(name) return _cog;
+            return this;
+        }
+    }
+
+}
+
+dc = function(){
+    var d = new Radii().cog(undefined, .90, .01, true);
+    return d;
+}
+
 weightCog = function(){
-    fromJson('[[0.89,-0.018333333333333333,true,"8ff125"],[0.87,-0.006666666666666666,true,"8e7691"],[0.83,0.021666666666666664,true,"f2553c"],[0.87,0.03,true,"8ff125"],[0.74,-0.01,true,"8e7691"],[0.6,0.010471975511965976,true,"f2553c"]]');
+
+    
+    var radii = new Radii();
+    radii.master();
+    radii.cog('first');
+    radii.cog('second');
+    
+    //fromJson('[[0.89,-0.018333333333333333,true,"8ff125"],[0.87,-0.006666666666666666,true,"8e7691"],[0.83,0.021666666666666664,true,"f2553c"],[0.87,0.03,true,"8ff125"],[0.74,-0.01,true,"8e7691"],[0.6,0.010471975511965976,true,"f2553c"]]');
 }

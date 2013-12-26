@@ -10,7 +10,7 @@ newVector = (function(p){
 
     return function(name){
         var v = new RadianVector(name, processing);
-        var p = vectors.push(v) - 1
+        var p = vectors.push(v) - 1;
         if(vectors[p-1]) {
             v.parent = vectors[p-1];
             vectors[p-1].child = v;

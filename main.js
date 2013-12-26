@@ -1,3 +1,4 @@
+/*! sprintf.js | Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro> | 3 clause BSD license */(function(e){function r(e){return Object.prototype.toString.call(e).slice(8,-1).toLowerCase()}function i(e,t){for(var n=[];t>0;n[--t]=e);return n.join("")}var t=function(){return t.cache.hasOwnProperty(arguments[0])||(t.cache[arguments[0]]=t.parse(arguments[0])),t.format.call(null,t.cache[arguments[0]],arguments)};t.format=function(e,n){var s=1,o=e.length,u="",a,f=[],l,c,h,p,d,v;for(l=0;l<o;l++){u=r(e[l]);if(u==="string")f.push(e[l]);else if(u==="array"){h=e[l];if(h[2]){a=n[s];for(c=0;c<h[2].length;c++){if(!a.hasOwnProperty(h[2][c]))throw t('[sprintf] property "%s" does not exist',h[2][c]);a=a[h[2][c]]}}else h[1]?a=n[h[1]]:a=n[s++];if(/[^s]/.test(h[8])&&r(a)!="number")throw t("[sprintf] expecting number but found %s",r(a));switch(h[8]){case"b":a=a.toString(2);break;case"c":a=String.fromCharCode(a);break;case"d":a=parseInt(a,10);break;case"e":a=h[7]?a.toExponential(h[7]):a.toExponential();break;case"f":a=h[7]?parseFloat(a).toFixed(h[7]):parseFloat(a);break;case"o":a=a.toString(8);break;case"s":a=(a=String(a))&&h[7]?a.substring(0,h[7]):a;break;case"u":a>>>=0;break;case"x":a=a.toString(16);break;case"X":a=a.toString(16).toUpperCase()}a=/[def]/.test(h[8])&&h[3]&&a>=0?"+"+a:a,d=h[4]?h[4]=="0"?"0":h[4].charAt(1):" ",v=h[6]-String(a).length,p=h[6]?i(d,v):"",f.push(h[5]?a+p:p+a)}}return f.join("")},t.cache={},t.parse=function(e){var t=e,n=[],r=[],i=0;while(t){if((n=/^[^\x25]+/.exec(t))!==null)r.push(n[0]);else if((n=/^\x25{2}/.exec(t))!==null)r.push("%");else{if((n=/^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(t))===null)throw"[sprintf] huh?";if(n[2]){i|=1;var s=[],o=n[2],u=[];if((u=/^([a-z_][a-z_\d]*)/i.exec(o))===null)throw"[sprintf] huh?";s.push(u[1]);while((o=o.substring(u[0].length))!=="")if((u=/^\.([a-z_][a-z_\d]*)/i.exec(o))!==null)s.push(u[1]);else{if((u=/^\[(\d+)\]/.exec(o))===null)throw"[sprintf] huh?";s.push(u[1])}n[2]=s}else i|=2;if(i===3)throw"[sprintf] mixing positional and named placeholders is not (yet) supported";r.push(n)}t=t.substring(n[0].length)}return r};var n=function(e,n,r){return r=n.slice(0),r.splice(0,0,e),t.apply(null,r)};e.sprintf=t,e.vsprintf=n})(typeof exports!="undefined"?exports:window);
 
 function arg(_a, ia, def, returnArray) {
     var v = null
@@ -33,19 +34,15 @@ function arg(_a, ia, def, returnArray) {
 
 var vectors = 4,
 	ready = false,
-	radii = [],
-	speeds = [],
-	colors= [],
-	toDraw = [],
 	fractal = document.getElementById( 'fractal' ),
 	circles = document.getElementById( 'circles' ),
 	fractalContext = fractal.getContext( '2d' ),
 	circleContext = circles.getContext( '2d' ),
 	width = circles.width,
 	height = circles.height,
-	rotate = [  ],
 	radiiClock =0,
 	posRadClock = true,
+	data= [], // Store everything in here...
 	pX = 0,
 	pY = 0;
 
@@ -64,8 +61,8 @@ window.requestAnimFrame = (function(){
 })();
 
 changeRadii = function changeRadii(v){
-	for (var i = 0; i < radii.length; i++) {	
-		radii[i]= v
+	for (var i = 0; i < data.length; i++) {	
+		data[i]= v
 	};
 }
 
@@ -80,30 +77,33 @@ function render(){
 	circleContext.clearRect( 0, 0, width, height );
 
 	// draw one circle
-	function drawCircle(i){
+	function drawCircle(circle){
 		circleContext.beginPath();
-		circleContext.strokeStyle = colors[i]
+		circleContext.strokeStyle = circle.color
+
 		circleContext.arc( x, y, r, 0, 2 * Math.PI, false );
 		circleContext.stroke();
 	}
 
-	//if(radiiClock > 400 || radiiClock < 0) posRadClock = !posRadClock;
-	/*
-	for (var i = 0; i < radii.length; i++) {	
-		radii[i]= .980 + (.0001 * radiiClock/2)
-	};
+	function drawLine(i) {
+		circleContext.beginPath();
+		circleContext.moveTo(x, y);
+		circleContext.lineTo(width * .8, y);
+		circleContext.stroke();
+	}
 
-	(posRadClock)? radiiClock++: radiiClock--
-	*/
-
-	for( var i=0; i < toDraw.length; i++ ){
+	var circle;
+	for( var i=0; i < data.length; i++ ){
+		circle = data[i];
+		drawCircle(circle);
+		// drawLine(i);
 		
-		drawCircle(i);
-		r2 = r * radii[i] || 1/3; // shrink each circle
-		rotate[ i ] += .1 * speeds[ i ] * 10;
-		x += ( r - r2 ) * Math.cos( rotate[ i ] );
-		y += ( r - r2 ) * Math.sin( rotate[ i ] );
+		r2 = r * circle.radius || 1/3; // shrink each circle
+		circle.rotate += .1 * circle.speed * 10;
+		x += ( r - r2 ) * Math.cos( circle.rotate );
+		y += ( r - r2 ) * Math.sin( circle.rotate );
 		r = r2;
+		// data[i].radii = r;
 	}
 
 }
@@ -121,10 +121,10 @@ toJson = function(){
 	var s = []
 	for (var i = 0; i < radii.length; i++) {
 			s.push([
-				radii[i], //  _radii 
-				speeds[i],
+				data[i].radii, //  _radii 
+				data[i].speed,
 				false,
-				colors[i]
+				data[i].color
 			])
 	};
 
@@ -137,46 +137,49 @@ addRadii = function(){
 		radius 		= arg(arguments, 0, 1/3),
 		speed 		= arg(arguments, 1, Math.PI / 300),
 		controls 	= arg(arguments, 2, true),
-		color 		= arg(arguments, 3, _color);
-
-	
- 	var r = radii.push(radius) - 1;
-	speeds.push(speed);
-	
-	colors.push(color)
-
-	var ld = String(toDraw.push(0)) -1;
-	ld + 1;
-	rotate.push(0)
-	var index = ld;
+		color 		= arg(arguments, 3, _color),
+		name 		= arg(arguments, 4, '');
 	var _id = Math.random().toString(32).slice(2);
+ 	var r = radius - 1;
 
-	if(!controls) return r;
-
-	var slider1 = '<input data-index="' +  index 
-		+ '"  data-r="' +  r
-		+ '" id="radius_' + _id
-		+ '" type="range" min="' + 1 
-		+ '" max="' + 99
-		+ '" />';
-
-	var slider2 = '<input data-index="' +  index 
-		+ '"  data-r="' +  r 
-		+ '" id="speed_' + _id 
-		+ '" type="range" min="' + -100
-		+ '" max="' + 100
-		+ '" />';
+	var d = {
+		id: _id,
+		rindex: r,
+		radius: radius,
+		speed: speed,
+		controls: controls,
+		color: color,
+		name: name,
+		rotate: 0
+	}
+	var index  = d.index = data.push(d) - 1;
 	
-	$(slider1).appendTo('#sliders').change(function(){
-		var _r = $(this).data('r') - 1;
-		localStorage['radii' + _r ] = radii[ _r ] = this.value / 100; 
-	})
 
-	$(slider2).appendTo('#speeds').change(function(){
-		var _r = $(this).data('r') - 1;
-		localStorage['speed' + _r ] = speeds[ _r ] = ( this.value / 3) * .005;
-	})
+	if(!controls) return d;
+	var html = sprintf($('.templates .controls').clone().html(), d);
+	$('<div/>', { 
+		'class': 'control',
+		html: html.trim()
+	}).appendTo('body');
 
-	return r
+	$('#radius_' + d.id).val( d.radius * 100 );
+	$('#radius_' + d.id).change(function(){
+		var _r = $(this).data('r') - 1;
+		var index = $(this).data('index') - 1;
+		// debugger;
+		if(index > -1) {
+			data[index].radius = this.value / 100; 
+		}
+	})
+	$('#speed_' + d.id).val( this.speed * 3 );
+	$('#speed_' + d.id).change(function(){
+		var _r = $(this).data('r') - 1;
+		var index = $(this).data('index') - 1;
+		if(index > -1) {
+			data[index].speed = ( this.value / 3) * .005;
+		}
+	})
+	
+	return d;
 }
 

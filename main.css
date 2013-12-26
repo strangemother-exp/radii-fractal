@@ -3,6 +3,10 @@ body {
   color: #FFF;
 }
 
+.hidden {
+  display: none;
+}
+
 canvas {
   position : absolute;
   top      : 0px;
@@ -70,3 +74,23 @@ width: 90%;
   width: 90%;
   height: 40px;
 }
+
+.control {
+float: left;
+padding: 5px;
+margin: 10px;
+background: #222;
+border-radius: 4px;
+}
+
+.control h2 {
+font-size: 16px;
+margin: 0 5px;
+}
+
+.control h2 .dark {
+color: #999;
+}
+
+
+
