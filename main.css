@@ -79,6 +79,7 @@ width: 90%;
 float: left;
 padding: 5px;
 margin: 10px;
+width: 46%;
 background: #222;
 border-radius: 4px;
 }
@@ -93,5 +94,5 @@ color: #999;
 }
 
 .control input[type='range'] {
-width: 200px;
+width: 48%;
 }

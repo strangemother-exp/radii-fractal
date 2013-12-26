@@ -191,8 +191,8 @@ dc = function(){
 weightCog = function(){
     var radii = new Radii();
     
-    radii.cog('first', .1, 0);
-    radii.cog('second', .5, 0);
+    radii.cog('first', .9, -0.01);
+    radii.cog('second', .8, 0.01);
     
     //fromJson('[[0.89,-0.018333333333333333,true,"8ff125"],[0.87,-0.006666666666666666,true,"8e7691"],[0.83,0.021666666666666664,true,"f2553c"],[0.87,0.03,true,"8ff125"],[0.74,-0.01,true,"8e7691"],[0.6,0.010471975511965976,true,"f2553c"]]');
 }

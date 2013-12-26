@@ -86,39 +86,54 @@ function render(){
 		circleContext.stroke();
 	}
 
-	function drawLabel( circle, p1, p2, alignment, padding ){
+	function drawLabel( circle, p2, alignment, padding ){
 		if (!alignment) alignment = 'left';
 		if (!padding) padding = 0;
 
-		var dx = p2.x - p1.x;
-		var dy = p2.y - p1.y;   
+		var x = width - 50 + offset;
+		var y = ( (circle.index * 30) + 20);
+
+		var dx = ( (p2)? p2.x: x) - circle.x;
+		var dy = ( (p2)?p2.y: y) - circle.y;
+		var len = Math.sqrt(dx*dx+dy*dy);
 		var p, pad;
 
 		if (alignment=='center'){
-			p = p1;
+			p = circle;
 			pad = 1/2;
 		} else {
 			var left = alignment=='left';
-			p = left ? p1 : p2;
+			p = p2;
 			pad = padding / Math.sqrt(dx*dx+dy*dy) * (left ? 1 : -1);
 		}
-
+		pad = pad || 1;
 		// debugger;
-		//circleContext.save();
+		circleContext.save();
 		circleContext.textAlign = alignment;
-		// circleContext.translate(p.x+dx*pad,p.y+dy*pad);
-		//circleContext.rotate(Math.atan2(dy,dx));
+		// console.log(dx,dy)
+		
+		// Keep text upright
+		var angle = Math.atan2(dy,dx);
+		
+		if (angle < -Math.PI/2 || angle > Math.PI/2){
+			var p = p1;
+			p1 = p2;
+			p2 = p;
+			dx *= -1;
+			dy *= -1;
+			angle -= Math.PI;
+		}
+		circleContext.translate(width - 140, y);
+		//circleContext.rotate(angle);
 		circleContext.fillStyle = "white"
 		// circleContext.fillText(text,0,0);
-		//circleContext.restore();
-		//circleContext.fillText(text,0,0);
 		
 		// circleContext.fillStyle = "whitwe";
 		circleContext.font = "normal 16px Arial";
-		var x = width - 50 + offset;
-		var y = ( (circle.index * 30) + 20);
 		
-		circleContext.fillText(circle.name, x, y) ;
+		circleContext.fillText(circle.name, 0,0);
+		//circleContext.fillText(circle.name, x, y) ;
+		circleContext.restore();
 		// debugger
 		return {
 			x: x,
@@ -129,10 +144,11 @@ function render(){
 	function drawLine(circle) {
 		
 		if(circle!==undefined && circle.controls) {
-			var label = drawLabel(circle, { x:x, y:y }, {x:x, y:y} )
+			var label = drawLabel(circle)
 
 			circleContext.beginPath();
-			circleContext.moveTo(x, y);
+			// debugger
+			circleContext.moveTo(x +r, y );
 			var tx=width * .9, 
 				ty=y;
 			// console.log(tx,label.x)
