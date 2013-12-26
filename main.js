@@ -66,6 +66,12 @@ changeRadii = function changeRadii(v){
 	};
 }
 
+allRadii = function(k, v){
+	for (var i = 0; i < data.length; i++) {
+		data[i][k] = v
+	};
+}
+
 function render(){
 	var offset = -100,
 		x = width  / 2 + offset,
@@ -132,6 +138,7 @@ function render(){
 		circleContext.font = "normal 16px Arial";
 		
 		circleContext.fillText(circle.name, 0,0);
+		circleContext.fillText(circle.rotate, 0, 20);
 		//circleContext.fillText(circle.name, x, y) ;
 		circleContext.restore();
 		// debugger
@@ -209,6 +216,14 @@ addRadii = function(){
 	var _id = Math.random().toString(32).slice(2);
  	var r = radius - 1;
 
+ 	/*
+ 	Initial rotation dictates the start state of the Radii.
+ 	TOP:  	allRadii('rotate', Math.PI*1.5)
+ 	RIGHT: 	allRadii('rotate', 0)
+ 	BOTTOM: allRadii('rotate', Math.PI*.5)
+ 	LEFT: 	allRadii('rotate', Math.PI)
+
+ 	 */
 	var d = {
 		id: _id,
 		rindex: r,
@@ -217,7 +232,7 @@ addRadii = function(){
 		controls: controls,
 		color: color,
 		name: name,
-		rotate: 0,
+		rotate: Math.PI * .5,
 		tspeed: speed * 3,
 		tradius: radius * 100
 	}
