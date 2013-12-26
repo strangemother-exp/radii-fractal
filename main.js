@@ -83,86 +83,6 @@ function render(){
 	// clear the circles
 	circleContext.clearRect( 0, 0, width, height );
 
-	// draw one circle
-	function drawCircle(circle){
-		circleContext.beginPath();
-		circleContext.strokeStyle = circle.color
-
-		circleContext.arc( x, y, r, 0, 2 * Math.PI, false );
-		circleContext.stroke();
-	}
-
-	function drawLabel( circle, p2, alignment, padding ){
-		if (!alignment) alignment = 'left';
-		if (!padding) padding = 0;
-
-		var x = width - 50 + offset;
-		var y = ( (circle.index * 30) + 20);
-
-		var dx = ( (p2)? p2.x: x) - circle.x;
-		var dy = ( (p2)?p2.y: y) - circle.y;
-		var len = Math.sqrt(dx*dx+dy*dy);
-		var p, pad;
-
-		if (alignment=='center'){
-			p = circle;
-			pad = 1/2;
-		} else {
-			var left = alignment=='left';
-			p = p2;
-			pad = padding / Math.sqrt(dx*dx+dy*dy) * (left ? 1 : -1);
-		}
-		pad = pad || 1;
-		// debugger;
-		circleContext.save();
-		circleContext.textAlign = alignment;
-		// console.log(dx,dy)
-		
-		// Keep text upright
-		var angle = Math.atan2(dy,dx);
-		
-		if (angle < -Math.PI/2 || angle > Math.PI/2){
-			var p = p1;
-			p1 = p2;
-			p2 = p;
-			dx *= -1;
-			dy *= -1;
-			angle -= Math.PI;
-		}
-		circleContext.translate(width - 140, y);
-		//circleContext.rotate(angle);
-		circleContext.fillStyle = "white"
-		// circleContext.fillText(text,0,0);
-		
-		// circleContext.fillStyle = "whitwe";
-		circleContext.font = "normal 16px Arial";
-		
-		circleContext.fillText(circle.name, 0,0);
-		circleContext.fillText(circle.rotate, 0, 20);
-		//circleContext.fillText(circle.name, x, y) ;
-		circleContext.restore();
-		// debugger
-		return {
-			x: x,
-			y: y
-		}
-	}
-
-	function drawLine(circle) {
-		
-		if(circle!==undefined && circle.controls) {
-			var label = drawLabel(circle)
-
-			circleContext.beginPath();
-			// debugger
-			circleContext.moveTo(x +r, y );
-			var tx=width * .9, 
-				ty=y;
-			// console.log(tx,label.x)
-			circleContext.lineTo(tx + offset + 35, label.y - 5);
-			circleContext.stroke();
-		}
-	}
 
 	var circle;
 	for( var i=0; i < data.length; i++ ){
@@ -170,19 +90,95 @@ function render(){
 		
 		r2 = r * circle.radius || 1/3; // shrink each circle
 		circle.rotate += .1 * circle.speed * 10;
-		x += ( r - r2 ) * Math.cos( circle.rotate );
-		y += ( r - r2 ) * Math.sin( circle.rotate );
-		r = r2;
+		x = x + ( r - r2 ) * Math.cos( circle.rotate );
+		y = y + ( r - r2 ) * Math.sin( circle.rotate );
+		circle.r = r = r2;
 		circle.x = x;
-		circle.y = y
-		drawCircle(circle);
-		drawLine(circle);
+		circle.y = y;
+		RF.draw.Circle(circle);
+		RF.draw.Line(circle);
 		// data[i].radii = r;
 	}
 
 }
 
-fromJson = function(s, f){
+RF = {
+	draw: {}
+}
+// draw one circle
+RF.draw.Circle = function drawCircle(circle){
+	circleContext.beginPath();
+	circleContext.strokeStyle = circle.color
+
+	circleContext.arc( circle.x, circle.y, circle.r, 0, 2 * Math.PI, false );
+	circleContext.stroke();
+}
+
+RF.draw.Label = function drawLabel( circle, p2){
+	var x = width - 50 + -100;
+	var y = ( (circle.index * 30) + 20);
+
+	var dx = ( (p2)? p2.x: x) - circle.x;
+	var dy = ( (p2)?p2.y: y) - circle.y;
+	var len = Math.sqrt(dx*dx+dy*dy);
+	var p, pad;
+
+	
+	var left =true;
+	p = p2;
+	pad = 1
+	// debugger;
+	circleContext.save();
+	// console.log(dx,dy)
+	
+	// Keep text upright
+	var angle = Math.atan2(dy,dx);
+	
+	if (angle < -Math.PI/2 || angle > Math.PI/2){
+		var p = p1;
+		p1 = p2;
+		p2 = p;
+		dx *= -1;
+		dy *= -1;
+		angle -= Math.PI;
+	}
+
+	circleContext.translate(width - 140, y);
+	//circleContext.rotate(angle);
+	circleContext.fillStyle = "white"
+	// circleContext.fillText(text,0,0);
+	
+	// circleContext.fillStyle = "whitwe";
+	circleContext.font = "normal 16px Arial";
+	
+	circleContext.fillText(circle.name, 0,0);
+	circleContext.font = "normal 10px Arial";
+	circleContext.fillText('r ' + circle.r, 0, 10);
+	//circleContext.fillText(circle.name, x, y) ;
+	circleContext.restore();
+	// debugger
+	return {
+		x: x,
+		y: y
+	}
+}
+
+RF.draw.Line = function drawLine(circle) {
+	
+	if(circle!==undefined && circle.controls) {
+		var label = RF.draw.Label(circle)
+
+		circleContext.beginPath();
+		// debugger
+		circleContext.moveTo(circle.x + circle.r, circle.y );
+		var tx=width * .9, 
+			ty=circle.y;
+		// console.log(tx,label.x)
+		circleContext.lineTo(tx + -100 + 35, label.y - 5);
+		circleContext.stroke();
+	}
+}
+RF.fromJson = function(s, f){
 	var json = JSON.parse(s);
 	for (var i = 0; i < json.length; i++) {
 		var el = json[i];
@@ -191,7 +187,7 @@ fromJson = function(s, f){
 	};
 }
 
-toJson = function(){
+RF.toJson = function(){
 	var s = []
 	for (var i = 0; i < data.length; i++) {
 			s.push([
@@ -205,8 +201,7 @@ toJson = function(){
 	return JSON.stringify(s);
 }
 
-
-addRadii = function(){
+RF.addRadii = function(){
 	var _color 		= Math.round((Math.random() * (0xFFFFFF - 0) + 0)).toString(16),
 		radius 		= arg(arguments, 0, 1/3),
 		speed 		= arg(arguments, 1, Math.PI / 300),
@@ -252,13 +247,12 @@ addRadii = function(){
 	$('#radius_' + d.id).change(function(){
 		var _r = $(this).data('r') - 1;
 		var index = $(this).data('index');
-		// debugger;
-		console.log("Index", index)
 		if(index > -1) {
 			console.log(data[index])
 			data[index].radius = this.value / 100; 
 		}
-	})
+	});
+
 	$('#speed_' + d.id).val( this.speed * 3 );
 	$('#speed_' + d.id).change(function(){
 		var _r = $(this).data('r') - 1;

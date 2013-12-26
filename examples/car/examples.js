@@ -140,7 +140,7 @@ cog = function(radius, speed, control, name){
     var _speed = arg(arguments, 1, speed)
     var _control = arg(arguments, 2, control);
 
-    var _cog = addRadii(
+    var _cog = RF.addRadii(
         _radius, 
         _speed ,
         _control,
