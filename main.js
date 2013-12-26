@@ -108,6 +108,28 @@ function render(){
 
 }
 
+fromJson = function(s, f){
+	var json = JSON.parse(s);
+	for (var i = 0; i < json.length; i++) {
+		var el = json[i];
+		
+		(f || addRadii).apply(this, el)
+	};
+}
+
+toJson = function(){
+	var s = []
+	for (var i = 0; i < radii.length; i++) {
+			s.push([
+				radii[i], //  _radii 
+				speeds[i],
+				false,
+				colors[i]
+			])
+	};
+
+	return JSON.stringify(s);
+}
 
 
 addRadii = function(){

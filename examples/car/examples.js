@@ -127,10 +127,23 @@ radialDemo = function(){
             addRadii(
                 (localStorage['radii' + i] || .97), 
                 (localStorage['speed' + i ] || (Math.random() * .1) ),
-                false,
+                true,
                 temprgb
                 );
         };
         
     });
+}
+
+var __cogi = 0
+cog = function(radius, speed, control){
+    addRadii(
+        (localStorage['radii' + __cogi] || radius), 
+        (localStorage['speed' + __cogi] || speed ),
+        control
+    );
+    __cogi++
+}
+weightCog = function(){
+    fromJson('[[0.89,-0.018333333333333333,true,"8ff125"],[0.87,-0.006666666666666666,true,"8e7691"],[0.83,0.021666666666666664,true,"f2553c"],[0.87,0.03,true,"8ff125"],[0.74,-0.01,true,"8e7691"],[0.6,0.010471975511965976,true,"f2553c"]]');
 }
