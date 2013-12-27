@@ -32,79 +32,75 @@ function arg(_a, ia, def, returnArray) {
 }
 
 
-var vectors = 4,
-	ready = false,
-	fractal = document.getElementById( 'fractal' ),
-	circles = document.getElementById( 'circles' ),
-	fractalContext = fractal.getContext( '2d' ),
+var circles = document.getElementById( 'circles' ),
 	circleContext = circles.getContext( '2d' ),
 	width = circles.width,
-	height = circles.height,
-	radiiClock =0,
-	posRadClock = true,
-	data= [], // Store everything in here...
-	pX = 0,
-	pY = 0;
+	height = circles.height;
 
-window.requestAnimFrame = (function(){
-	return  window.requestAnimationFrame       ||
-			window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame    ||
-			function( callback ){
-			window.setTimeout(callback, 1000 / 60);
-			};
-})();
+RF = {
+	draw: {},
+	data: []
+}
 
-(function animloop(){
-	requestAnimFrame(animloop);
-	render();
-})();
+RF.loop = function(){
+	window.requestAnimFrame = (function(){
+		return  window.requestAnimationFrame       ||
+				window.webkitRequestAnimationFrame ||
+				window.mozRequestAnimationFrame    ||
+				function( callback ){
+					window.setTimeout(callback, 1000 / 60);
+				};
+	})();
 
-changeRadii = function changeRadii(v){
-	for (var i = 0; i < data.length; i++) {	
-		data[i]= v
+	(function animloop(){
+		requestAnimFrame(animloop);
+		RF.render();
+	})();
+}
+
+RF.changeRadii = function changeRadii(v){
+	for (var i = 0; i < RF.data.length; i++) {	
+		RF.data[i]= v
 	};
 }
 
-allRadii = function(k, v){
-	for (var i = 0; i < data.length; i++) {
-		data[i][k] = v
+RF.allRadii = function(k, v){
+	for (var i = 0; i < RF.data.length; i++) {
+		RF.data[i][k] = v
 	};
 }
 
-function render(){
+RF.render = function render(){
 	var offset = -100,
-		x = width  / 2 + offset,
-		y = height / 2,
-		r = Math.min( width, height ) / 2,
+		x = RF.width  / 2 + offset,
+		y = RF.height / 2,
+		r = Math.min( RF.width, RF.height ) / 2,
 		r2;
 
 	circleContext.lineWidth = 2;
 	// clear the circles
-	circleContext.clearRect( 0, 0, width, height );
+	circleContext.clearRect( 0, 0, RF.width, RF.height );
 
 
 	var circle;
-	for( var i=0; i < data.length; i++ ){
-		circle = data[i]; 
+
+	for( var i=0; i < RF.data.length; i++ ){
+		circle = RF.data[i]; 
 		
 		r2 = r * circle.radius || 1/3; // shrink each circle
 		circle.rotate += .1 * circle.speed * 10;
-		x = x + ( r - r2 ) * Math.cos( circle.rotate );
-		y = y + ( r - r2 ) * Math.sin( circle.rotate );
+		x += ( r - r2 ) * Math.cos( circle.rotate );
+		y += ( r - r2 ) * Math.sin( circle.rotate );
 		circle.r = r = r2;
-		circle.x = x;
-		circle.y = y;
+		circle.x = x
+		circle.y = y
+
 		RF.draw.Circle(circle);
 		RF.draw.Line(circle);
-		// data[i].radii = r;
+		// RF.data[i].radii = r;
 	}
-
 }
 
-RF = {
-	draw: {}
-}
 // draw one circle
 RF.draw.Circle = function drawCircle(circle){
 	circleContext.beginPath();
@@ -115,7 +111,7 @@ RF.draw.Circle = function drawCircle(circle){
 }
 
 RF.draw.Label = function drawLabel( circle, p2){
-	var x = width - 50 + -100;
+	var x = RF.width - 50 + -100;
 	var y = ( (circle.index * 30) + 20);
 
 	var dx = ( (p2)? p2.x: x) - circle.x;
@@ -143,7 +139,7 @@ RF.draw.Label = function drawLabel( circle, p2){
 		angle -= Math.PI;
 	}
 
-	circleContext.translate(width - 140, y);
+	circleContext.translate(RF.width - 140, y);
 	//circleContext.rotate(angle);
 	circleContext.fillStyle = "white"
 	// circleContext.fillText(text,0,0);
@@ -153,7 +149,7 @@ RF.draw.Label = function drawLabel( circle, p2){
 	
 	circleContext.fillText(circle.name, 0,0);
 	circleContext.font = "normal 10px Arial";
-	circleContext.fillText('r ' + circle.r, 0, 10);
+	circleContext.fillText('x ' + circle.x, 0, 10);
 	//circleContext.fillText(circle.name, x, y) ;
 	circleContext.restore();
 	// debugger
@@ -171,13 +167,14 @@ RF.draw.Line = function drawLine(circle) {
 		circleContext.beginPath();
 		// debugger
 		circleContext.moveTo(circle.x + circle.r, circle.y );
-		var tx=width * .9, 
-			ty=circle.y;
+		var tx = RF.width * .9, 
+			ty = circle.y;
 		// console.log(tx,label.x)
 		circleContext.lineTo(tx + -100 + 35, label.y - 5);
 		circleContext.stroke();
 	}
 }
+
 RF.fromJson = function(s, f){
 	var json = JSON.parse(s);
 	for (var i = 0; i < json.length; i++) {
@@ -189,16 +186,31 @@ RF.fromJson = function(s, f){
 
 RF.toJson = function(){
 	var s = []
-	for (var i = 0; i < data.length; i++) {
+	for (var i = 0; i < RF.data.length; i++) {
 			s.push([
-				data[i].radius, //  _radii 
-				data[i].speed,
+				RF.data[i].radius, //  _radii 
+				RF.data[i].speed,
 				false,
-				data[i].color
+				RF.data[i].color
 			])
 	};
 
 	return JSON.stringify(s);
+}
+
+RF.radiiMethods = function(radii) {
+	
+	return (function(){
+		var self = this;
+
+		var init = function(radii){
+			return this;
+		}
+		this.parent = function(){
+			console.log(radii.index-1)
+		}
+		return init.apply(this, arguments)
+	}).apply({}, arguments)
 }
 
 RF.addRadii = function(){
@@ -229,10 +241,12 @@ RF.addRadii = function(){
 		name: name,
 		rotate: Math.PI * .5,
 		tspeed: speed * 3,
-		tradius: radius * 100
+		tradius: radius * 100,
+		_: null
 	}
-
-	var index  = d.index = data.push(d) - 1;
+	// Methods used by a circle.
+	d._ = RF.radiiMethods(d)
+	var index  = d.index = RF.data.push(d) - 1;
 	
 
 	if(!controls) return d;
@@ -248,8 +262,7 @@ RF.addRadii = function(){
 		var _r = $(this).data('r') - 1;
 		var index = $(this).data('index');
 		if(index > -1) {
-			console.log(data[index])
-			data[index].radius = this.value / 100; 
+			RF.data[index].radius = this.value / 100; 
 		}
 	});
 
@@ -258,10 +271,20 @@ RF.addRadii = function(){
 		var _r = $(this).data('r') - 1;
 		var index = $(this).data('index');
 		if(index > -1) {
-			data[index].speed = ( this.value / 3) * .005;
+			RF.data[index].speed = ( this.value / 3) * .005;
 		}
 	})
 	
 	return d;
 }
 
+RF.start = function(context){
+	this._context = context;
+	this.element = document.getElementById( this._context );
+	this.context = this.element.getContext( '2d' );
+	this.width = this.element.width;
+	this.height = this.element.height;
+	RF.loop();
+};
+
+RF.start('circles')
