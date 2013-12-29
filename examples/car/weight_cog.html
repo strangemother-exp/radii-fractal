@@ -7,42 +7,32 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link href="../../jquery-ui-1.10.2.custom/css/ui-lightness/jquery-ui-1.10.2.custom.css" rel="stylesheet">
-    <script src="../../jquery-ui-1.10.2.custom/js/jquery-1.9.1.js"></script>
-    <script src="../../jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../main.css">
         <title></title>
     </head>
+
     <body>
         <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
         <header></header>
+
          <div class="templates hidden">
             <div class="controls">
                 <h2><span class="dark">Radii</span> %(name)s</h2>
-                <input data-index="%(index)s" value='%(tradius)s' data-r="%(rindex)s" id="radius_%(id)s" type="range" min="1" max="99">
+                <input data-index="%(index)s" value='%(tradius)s' data-r="%(rindex)s" id="radius_%(id)s" type="range" min="1" max="100">
                 <input data-index="%(index)s" value='%(tspeed)s' data-r="%(rindex)s" id="speed_%(id)s" type="range" min="-100" max="100">
             </div>
         </div>
+
         <div class='view'>
-            <canvas id="fractal" width='960px' height='700px'></canvas>
             <canvas id="circles" width='960px' height='700px'></canvas>
         </div>
 
-        <div class='set' id="sliders">
-          <h1>Sizes</h1>
-            
-        </div>
-
-        <div class='set' id="speeds">
-          <h1>Speeds</h1> 
-        </div>
-        
-
-        <script type="text/javascript" src="../../main.js"></script>
+        <script src="../../jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../RF.js"></script>
         <script type="text/javascript" src="examples.js"></script>
         <script type="text/javascript">
-            weightCog()
+            weightCog('circles')
         </script>
 
     </body>
