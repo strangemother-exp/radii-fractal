@@ -9,6 +9,16 @@ This numerical output information can be applied to vectors of your own work.
 
 Lets breakdown some of the terminology
 
+Configuration options are available at the Global level
+
+    // How many segments of a cog (circle) to draw
+    RF.config('arcSize', 360) // Degree (0 - 260)
+    // how large relative to a parent
+    RF.config('radius', .9) // default radius (0 - 1)
+    // how fast.
+    RF.config('speed', .9) // default radius (0 >)
+
+
 ### A Radii
 
 A radii is a set of Circles (or Cogs) applied to the algorithm to be used within the nested chain.

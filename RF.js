@@ -75,19 +75,23 @@ RF.allRadii = function(k, v){
     };
 }
 
-RF.render = function render(){
+RF.render = function render(context){
+    if(context === undefined) {
+        context = RF.context;
+    }
+
     var offset  = -100,
         x       = RF.width  / 2 + offset,
         y       = RF.height / 2,
         r       = Math.min( RF.width, RF.height ) / 2,
         r2;
 
-    RF.context.lineWidth = 1;
-    RF.context.clearRect( 0, 0, RF.width, RF.height );
+    context.lineWidth = 1;
+    context.clearRect( 0, 0, RF.width, RF.height );
 
     var circle;
     var _speed;
-    
+
     for (var i=0; i < RF.data.length; i++ ) {
         circle = RF.data[i]; 
         _speed =  circle.speed;
@@ -102,16 +106,20 @@ RF.render = function render(){
         circle.x = x
         circle.y = y
 
-        RF.draw.Circle(circle);
-        RF.draw.Line(circle);
-        circle.render(x, y, r, r2)
+        RF.draw.Circle(context, circle);
+        RF.draw.Line(context, circle);
+        circle.render(context, x, y, r, r2)
         // RF.data[i].radii = r;
     }
 }
 
-RF.draw.Circle = function drawCircle(circle) {
-    RF.context.beginPath();
-    RF.context.strokeStyle = circle.color
+RF.draw.Circle = function drawCircle(context, circle) {
+    if(context === undefined) {
+        context = RF.context;
+    }
+
+    context.beginPath();
+    context.strokeStyle = circle.color
     //console.log(circle._data)
     var orient = ( (2 / 360) * (RF.config('orientation') + -90) ) * Math.PI;
     var _arcStart = orient + ( (2 / 360) * (circle.arcStart ||  RF.config('arcStart')) ) * Math.PI;
@@ -119,12 +127,44 @@ RF.draw.Circle = function drawCircle(circle) {
     var _x = circle.x,
         _y = circle.y;
 
-    RF.context.arc( _x, _y, circle.r, _arcStart, _arc , false);
-    RF.context.stroke();
+    context.arc( _x, _y, circle.r, _arcStart, _arc , false);
+    context.stroke();
 }
 
+RF.draw.LineGraph = function(context, circle, label) {
+   
+    if(label.data.length < 2) return
+    var s = Smooth(label.data, { scaleTo: 100}),
+        len = s.count;
 
-RF.draw.Label = function drawLabel( circle, p2) {
+    context.lineWidth = 1;
+    context.lineJoin = 'round';
+    context.fillStyle = circle.color;
+    var d=0;
+    var i = 0
+    context.moveTo(0,0);
+    
+    while(i!=len) {
+        i++
+        d = label.data[i];
+        // Draw a spot on the
+        // point
+        context.beginPath();
+        var offset = (d*d) / (label.y*label.y) + label.y;
+        context.arc(label.x + (i), offset , 1, 0, Math.PI * 2, true);
+        // context.lineTo(label.x + (i*1.9), d - label.y)
+        //context.stroke();
+        context.fill();   
+    }
+    context.closePath();
+    // debugger;
+}
+
+RF.draw.Label = function drawLabel(context, circle, p2) {
+    if(context === undefined) {
+        context = RF.context;
+    }
+
     var x   = RF.width - 50 + -100,
         y   = ( (circle.index * 30) + 20),
         dx  = ( (p2)? p2.x: x) - circle.x,
@@ -136,12 +176,51 @@ RF.draw.Label = function drawLabel( circle, p2) {
     
     RF.context.save();
     
-    RF.context.translate(RF.width - 140, y);
+    var label, fontLine, method, value;
+
     RF.context.fillStyle = "white"
     RF.context.font = "normal 16px Arial";
     RF.context.fillText(circle.name, 0,0);
     RF.context.font = "normal 10px Arial";
-    RF.context.fillText('x ' + circle.x, 0, 10);
+    
+    if(circle._._labels){
+        var item;
+        for (var i = 0; i < circle._._labels.length; i++) {
+            item = circle._._labels[i];
+
+            label = item.name;
+            fontLine = item.font;
+            method = item.method;
+            _m = method.apply(circle);
+            item.x = RF.width - 140
+            item.y = y+=20;
+            // debugger;
+            value = (_m && _m.hasOwnProperty('toString') )? _m.toString(): _m;
+           
+            if(_m.type == 'line') {
+                // create a chart.
+                if(!item.data) {
+                    item.data = [];
+                }
+                value = _m.v
+                var _w = context.measureText(label + ' ' + value).width;
+                if(item.data.length > _w) {
+                    item.data.shift()
+                } else {
+                    item.data.push(_m.v);    
+                }
+                // console.log(item.data);
+                RF.draw.LineGraph(context, circle, item);
+                
+
+            }
+
+            RF.context.translate(item.x, item.y);
+            RF.context.fillText(label + ' ' + value, 0, i*10);
+            
+        };
+    }
+
     RF.context.restore();
     
     return {
@@ -150,8 +229,11 @@ RF.draw.Label = function drawLabel( circle, p2) {
     }
 }
 
-RF.draw.Line = function drawLine(circle) {
-    
+RF.draw.Line = function drawLine(context, circle) {
+    if(context === undefined) {
+        context = RF.context;
+    }
+
     if(circle!==undefined && circle.controls) {
         var label = circle.render()
         RF.context.beginPath();
@@ -193,14 +275,14 @@ RF.radiiMethods = function(radii) {
             return this;
         };
 
-        this.render = function(){
+        this.render = function(context){
             
-            var x = function(){
-                var label = RF.draw.Label(self);
+            var x = function(context){
+                var label = RF.draw.Label(context, self);
                 return label;    
             }
 
-            return x()
+            return x(context)
         }
 
         this.v = function(k, v) {
@@ -216,15 +298,24 @@ RF.radiiMethods = function(radii) {
             return this[k];
         };
 
-        this.label = function(text) {
+        this.label = function() {
             /*
             Places a point label in the list.
              */
-            this.text = arg(arguments, 0, text || this.text);
-            this.line = arg(arguments, 1, false);
+            var label = arg(arguments, 0, '');
+            var method = arg(arguments, 1, false);
+            var font = arg(arguments, 2, undefined);
 
-            if(text) return this;
-            return this.text;
+            
+            if(!this._labels) {
+                this._labels = [{
+                    name: label,
+                    font: font,
+                    method: method
+                }];
+            }
+
+            return this
         }
 
         return init.apply(this, arguments)
@@ -324,7 +415,26 @@ RF.start = function(context){
     this.context = this.element.getContext( '2d' );
     this.width = this.element.width;
     this.height = this.element.height;
+    this.layers = [];
     RF.loop();
+
+    this.container = new CanvasLayers.Container(this.element, false);
+    var _l = new CanvasLayers.Layer(10, 60, 60, 60);
+
+    this.layers.push({
+        name: 'main',
+        layer: _l
+    });
+
+    this.container.getChildren().add(_l);
+
+    _l.onRender = function(layer, rect, context) {
+        console.log('render')
+        context.fillStyle = '#000';
+        context.fillRect(70, 0, layer.getWidth(), layer.getHeight());
+        RF.render(context)
+    }
+
 };
 
 RF.config = function(name, value){ 

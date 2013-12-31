@@ -180,3 +180,17 @@ chains = function(canvasName) {
         reverse: true
     })
 }
+
+simpleDynamics = function(canvasName) {
+    radii = new Radii(canvasName);
+    radii.clear()
+    radii.speed(0);
+    cog = radii.cog('size', 0.9);
+    cog.label('X plot', function() {
+        // debugger
+        return {
+            type: 'line',
+            v: Math.round(this.x * Math.pow(10,1))/Math.pow(10,1)
+        }
+    }, "normal 10px Arial")
+}

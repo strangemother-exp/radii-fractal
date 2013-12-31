@@ -28,14 +28,19 @@
             <canvas id="circles" width='960px' height='700px'></canvas>
         </div>
 
-        <script src="../../jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../RF.js"></script>
-        <script type="text/javascript" src="leap.js"></script>
-        <script type="text/javascript" src="examples.js"></script>
-        <script type="text/javascript" src="leap-bridge.js"></script>
-        <script type="text/javascript">
-            weightCog('circles')
+        <script src="../js/app.js">
+            app.assets({
+                jquery: '../../jquery-1.9.1.js',
+                main: ['examples.js', 'leap.js', 'leap-bridge.js'],
+                RF: ['../../RF.js', '../js/smooth.js'],
+                renderer: ['../js/canvaslayers/canvaslayers.js'],
+                examples: [
+                    'renderer', 'jquery', 'main', 'RF'
+                ],
+                weightCog: ['examples', '../js/smoothie.js']
+            }).load('weightCog', function(){
+                weightCog('circles')
+            })
         </script>
-
     </body>
 </html>
