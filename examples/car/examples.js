@@ -159,10 +159,24 @@ dc = function(){
 }
 
 weightCog = function(canvasName){
-    var radii = new Radii(canvasName);
-    
-    radii.cog('first', .9, 0.01).v('name', 'bob');
-    radii.cog('second', .8, -0.01);
-    
+    radii = new Radii(canvasName);
+    speed = 0.01;
+    radii.cog('first', .9, speed).v('name', 'bob');
+    radii.cog('second', .9, -speed);
+    radii.cog('third', .9, speed);
+    radii.cog('forth', .9, -speed);
     //fromJson('[[0.89,-0.018333333333333333,true,"8ff125"],[0.87,-0.006666666666666666,true,"8e7691"],[0.83,0.021666666666666664,true,"f2553c"],[0.87,0.03,true,"8ff125"],[0.74,-0.01,true,"8e7691"],[0.6,0.010471975511965976,true,"f2553c"]]');
+}
+
+chains = function(canvasName) {
+    radii = new Radii(canvasName);
+    
+    radii.speed(.01)
+    .cog(.9)
+    .cog(.9, {
+        reverse: true
+    }).cog(.9)
+    .cog(.9, {
+        reverse: true
+    })
 }

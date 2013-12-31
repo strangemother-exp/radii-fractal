@@ -13,12 +13,20 @@ Lets breakdown some of the terminology
 
 A radii is a set of Circles (or Cogs) applied to the algorithm to be used within the nested chain.
 
-A radii can contain many Cogs. each Cog affects the children cogs and these changes can be ready back through methods.
+A radii can contain many Cogs. each Cog affects the children cogs and these changes can be read back through methods.
 
 
 ### A Cog
 
 A cog contains all the variables needed to compute the 2d position, along with callbacks to help read the values created.
+
+### facts
+
++ A cog will complete one revolution at the speed as a parent cog, regardless of size
+
+    radii.cog('first', .9, 0.01);
+    radii.cog('second', .1, -0.01);
+    // Both cogs will meet revolutions
 
 # Getting Started
 

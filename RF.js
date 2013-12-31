@@ -33,8 +33,18 @@ function arg(_a, ia, def, returnArray) {
 var circles = document.getElementById( 'circles' );
 
 RF = {
+    _class: 'RadiiFractal',
     draw: {},
-    data: []
+    data: [],
+    __config: {
+        speed: .01,
+        radius: .9,
+        arcSize: 360,
+        arcStart: 0,
+        // Starting positon to draw a circle. 
+        // 0 to 360. zero being 12 o'clock
+        orientation: 0
+    }
 }
 
 RF.loop = function(){
@@ -76,12 +86,16 @@ RF.render = function render(){
     RF.context.clearRect( 0, 0, RF.width, RF.height );
 
     var circle;
-
+    var _speed;
+    
     for (var i=0; i < RF.data.length; i++ ) {
         circle = RF.data[i]; 
-        
+        _speed =  circle.speed;
+         if(circle.data('reverse')) {
+            _speed = -circle.speed
+        }
         r2 = r * circle.radius || 1/3; // shrink each circle
-        circle.rotate += .1 * circle.speed * 10;
+        circle.rotate += .1 * _speed * 10;
         x += ( r - r2 ) * Math.cos( circle.rotate );
         y += ( r - r2 ) * Math.sin( circle.rotate );
         circle.r = r = r2;
@@ -98,10 +112,17 @@ RF.render = function render(){
 RF.draw.Circle = function drawCircle(circle) {
     RF.context.beginPath();
     RF.context.strokeStyle = circle.color
+    //console.log(circle._data)
+    var orient = ( (2 / 360) * (RF.config('orientation') + -90) ) * Math.PI;
+    var _arcStart = orient + ( (2 / 360) * (circle.arcStart ||  RF.config('arcStart')) ) * Math.PI;
+    var _arc = orient + ( (2 / 360) * (circle.arcSize ||  RF.config('arcSize')) ) * Math.PI;
+    var _x = circle.x,
+        _y = circle.y;
 
-    RF.context.arc( circle.x, circle.y, circle.r, 0, 2 * Math.PI, false );
+    RF.context.arc( _x, _y, circle.r, _arcStart, _arc , false);
     RF.context.stroke();
 }
+
 
 RF.draw.Label = function drawLabel( circle, p2) {
     var x   = RF.width - 50 + -100,
@@ -116,12 +137,9 @@ RF.draw.Label = function drawLabel( circle, p2) {
     RF.context.save();
     
     RF.context.translate(RF.width - 140, y);
-    
     RF.context.fillStyle = "white"
-
     RF.context.font = "normal 16px Arial";
     RF.context.fillText(circle.name, 0,0);
-
     RF.context.font = "normal 10px Arial";
     RF.context.fillText('x ' + circle.x, 0, 10);
     RF.context.restore();
@@ -233,6 +251,7 @@ RF.addRadii = function(){
     */
  
     var d = {
+        _class:   'Cog',
         id:       _id,
         rindex:   r,
         radius:   radius,
@@ -243,7 +262,22 @@ RF.addRadii = function(){
         rotate:   Math.PI * .5,
         tspeed:   speed * 3,
         tradius:  radius * 100,
-        _:        null
+        __ar:     0,
+        _:        null,
+        toString: function(){ return 'Cog(' + this.id + ')'; },
+        data: function(obj){
+            if(this._data == undefined) this._data = {}
+            if(typeof(obj) == 'string'){
+                return (this._data.hasOwnProperty(obj))? this._data[obj]: undefined;
+            }
+            if(obj) {
+                this._data = obj;
+                return this
+            } else {
+                return this._data || {};
+            }
+
+        }
     }
 
     // Methods used by a circle.
@@ -285,7 +319,7 @@ RF.controls = function(d){
 }
 
 RF.start = function(context){
-    this._context = context;
+    this._context = context || this._context;
     this.element = document.getElementById( this._context );
     this.context = this.element.getContext( '2d' );
     this.width = this.element.width;
@@ -293,44 +327,123 @@ RF.start = function(context){
     RF.loop();
 };
 
+RF.config = function(name, value){ 
+    if(name !== undefined) {
+        if(value !== undefined) {
+            RF.__config[name] = value;
+            return this;
+        }
+        return RF.__config[name]
+    } else {
+
+        return RF.__config;
+    }
+}
+
 var Radii = function(canvasId){
     var self = this;
     RF.start(canvasId);
 
-    return {
+    R = {
+        _class: 'Radii',
         master: function(){
-            this.masterCog = cog(.99 , 0, false, 'master');
+            this.masterCog = cog(.99 , 0, false, 'master').v('color', 'black');
         },
         __cogi: 0,
 
-        cog: function(name){
+        speed: function(v){
+            /*
+            Change the overall speed of RF cogs.
+            Each cog will be altered - all new cogs will 
+            be this speed by default.
+             */
+            return RF.config.call(this, 'speed', v);
+        },
+        radius: function(v){
+            // Change the generic value for radius. By default this is .9
+            return RF.config.call(this, 'radius', v)
+        },
+        controls: function(v) {
+            return RF.config.call(this, 'controls', v)
+        },
+        randomString: function(){
+            // returns a 7 character random string
+            return Math.random().toString(32).slice(2)
+        },
+        clear: function(){
+            $('body .control').remove();
+            R.__cogi = 0;
+            RF.data = []
+        },
+        data: function(obj){
+            if(obj) {
+                this._data = obj;
+                return this
+            } else {
+                return this._data || {};
+            }
+        },
+        cog: function(){
             /*
             create a nested cog within the Radii fractal.
             Returned is a cog scoped chain.
-             */
-            var _radius = arg(arguments, 1, .92)
-            var _speed = arg(arguments, 2, .1)
-            var _control = arg(arguments, 3, true);
 
-            if(!this.masterCog) {
-                this.master();
+            E.g:
+
+                name    String - Give the cog a unique name (not enforced)
+                radius  Number - width of the cog 0.00 - 1.00
+                speed   Number - speed of rotation 0.00 >
+                control Boolean - this cog has control inputs.
+                
+                cog('foo');
+                cog(name, radius, speed, control);
+
+            Define a cog without a name - an ID will be given
+                
+                cog(.9)
+                cog(radius, speed, control)
+             */
+            var name     = arg(arguments, 0, R.randomString())
+            var _radius  = arg(arguments, 1, R.radius())
+            var _speed   = arg(arguments, 2, R.speed())
+            var _control = arg(arguments, 3, true);
+            var data    = arg(arguments, 4, {});
+
+            if(!R.masterCog) {
+                R.master();
             };
+            if(typeof(name) == 'number') {
+                data = _radius || _data;
+                // radius passed and no object
+                name = data.name || R.randomString();
+                _speed = data.speed || R.speed();
+                _control = data.control || true;
+                _radius = arguments[0];
+            }
             
             if(!name) {
-                name = Math.random().toString(32).slice(2)
+                name = Math.random().toString(32).slice(2);
             }
 
-            var _cog = RF.addRadii(
+            var _cog = RF.addRadii.call(R,
                 _radius, 
                 _speed ,
                 _control,
                 undefined,
                 name
-            );
+            )
+            
+            // debugger;
+            if(typeof(data) == 'object') {
+                _cog.data(data);
+            }
 
-            this.__cogi++;
+            R.__cogi++;
+            _cog.cog = R.cog;
             if(name) return _cog;
-            return this;
+            return R;
         }
     }
+
+    return R;
 }
